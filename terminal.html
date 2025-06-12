@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kali Terminal Assistant</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: url("kali-bg.png") no-repeat center center fixed;
+      background-size: cover;
+      font-family: monospace;
+      color: #00ff00;
+    }
+    #terminal {
+      background-color: rgba(0, 0, 0, 0.75);
+      padding: 20px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .line {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .prompt {
+      color: #00ccff;
+    }
+    .input {
+      color: #00ff00;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: monospace;
+      font-size: 1em;
+      flex-grow: 1;
+    }
+    .response {
+      color: #cccccc;
+      white-space: pre-wrap;
+      margin-left: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    const pass = prompt("Enter password:");
+    if (pass !== "ill.") {
+      document.body.innerHTML = "<h1 style='color:red;'>Unauthorized</h1>";
+      throw new Error("Unauthorized access");
+    }
+  </script>
+
+  <div id="terminal"></div>
+  <script>
+    const terminal = document.getElementById("terminal");
+
+    function printResponse(text) {
+      const response = document.createElement("div");
+      response.className = "response";
+      response.textContent = text;
+      terminal.appendChild(response);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function newPrompt() {
+      const line = document.createElement("div");
+      line.className = "line";
+
+      const prompt = document.createElement("span");
+      prompt.className = "prompt";
+      prompt.innerHTML = "kali@kali:~$ ";
+
+      const input = document.createElement("input");
+      input.className = "input";
+      input.type = "text";
+
+      input.addEventListener("keydown", async function (e) {
+        if (e.key === "Enter") {
+          const command = input.value;
+          input.disabled = true;
+
+          window.parent.postMessage({ type: "gpt-terminal", prompt: command }, "*");
+
+          printResponse("⏳ กำลังประมวลผล...");
+          newPrompt();
+        }
+      });
+
+      line.appendChild(prompt);
+      line.appendChild(input);
+      terminal.appendChild(line);
+      input.focus();
+    }
+
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "gpt-terminal-response") {
+        const responses = terminal.querySelectorAll(".response");
+        if (responses.length) {
+          responses[responses.length - 1].textContent = event.data.content;
+        }
+      }
+    });
+
+    newPrompt();
+  </script>
+</body>
+</html>
