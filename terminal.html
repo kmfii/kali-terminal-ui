@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Kali Terminal (Debug)</title>
+  <meta charset="UTF-8" />
+  <title>Kali Terminal</title>
   <style>
     html, body {
       margin: 0;
@@ -44,28 +44,16 @@
 </head>
 <body>
   <div id="terminal"></div>
+
   <script>
     const terminal = document.getElementById("terminal");
 
     function printResponse(text) {
       const response = document.createElement("div");
       response.className = "response";
-      response.textContent = text || "❌ ไม่มีข้อความตอบกลับจาก GPT";
+      response.textContent = text;
       terminal.appendChild(response);
       terminal.scrollTop = terminal.scrollHeight;
-      console.log("📤 แสดงผลตอบกลับ:", text);
-    }
-
-    function sendToGPT(prompt) {
-      if (!prompt.trim()) {
-        printResponse("⚠️ โปรดพิมพ์คำสั่งก่อนกด Enter");
-        return;
-      }
-      console.log("📨 ส่งคำสั่งไปยัง GPT ผ่าน postMessage:", prompt);
-      window.parent.postMessage({
-        type: "gpt-terminal",
-        prompt: prompt
-      }, "*");
     }
 
     function newPrompt() {
@@ -83,10 +71,15 @@
 
       input.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
-          const command = input.value;
+          const command = input.value.trim();
+          if (!command) return;
+
           input.disabled = true;
+
+          console.log("📤 ส่งคำสั่งไปยัง GPT ผ่าน postMessage:", command);
+          window.parent.postMessage({ type: "gpt-terminal", prompt: command }, "*");
+
           printResponse("⏳ กำลังประมวลผล...");
-          sendToGPT(command);
           newPrompt();
         }
       });
@@ -99,18 +92,12 @@
     }
 
     window.addEventListener("message", (event) => {
-      console.log("📥 รับ message จาก GPT:", event);
       if (event.data?.type === "gpt-terminal-response") {
         const responses = terminal.querySelectorAll(".response");
-        if (responses.length) {
-          const reply = event.data.content || "❌ ไม่มีข้อความตอบกลับจาก GPT";
-          responses[responses.length - 1].textContent = reply;
-          console.log("📤 แสดงผลตอบกลับ:", reply);
-        } else {
-          console.warn("⚠️ ไม่พบ response element เพื่อแสดงผล");
+        if (responses.length > 0) {
+          responses[responses.length - 1].textContent = event.data.content;
         }
-      } else {
-        console.log("📎 ข้าม message ที่ไม่เกี่ยวข้อง:", event.data);
+        console.log("📥 รับผลลัพธ์จาก GPT:", event.data.content);
       }
     });
 
