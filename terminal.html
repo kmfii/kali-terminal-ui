@@ -91,13 +91,19 @@
       input.focus();
     }
 
-    // ✅ ฟังผลลัพธ์จาก GPT
+    // ✅ ฟังผลลัพธ์จาก GPT พร้อม debug และ fallback
     window.addEventListener("message", (event) => {
+      console.log("📥 terminal.html ได้รับ message:", event);
+
       if (event.data?.type === "gpt-terminal-response") {
         const responses = terminal.querySelectorAll(".response");
+
         if (responses.length > 0) {
           responses[responses.length - 1].textContent = event.data.content;
+        } else {
+          printResponse(event.data.content); // fallback
         }
+
         console.log("📥 รับผลลัพธ์จาก GPT:", event.data.content);
       }
     });
