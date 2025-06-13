@@ -91,6 +91,7 @@
       input.focus();
     }
 
+    // ✅ ตัวรับผลลัพธ์จาก GPT
     window.addEventListener("message", (event) => {
       if (event.data?.type === "gpt-terminal-response") {
         const responses = terminal.querySelectorAll(".response");
