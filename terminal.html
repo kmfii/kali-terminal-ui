@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Kali Terminal Assistant</title>
+  <meta charset="UTF-8">
+  <title>Kali Terminal</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      background: url("kali-bg.png") no-repeat center center fixed;
-      background-size: cover;
+      background-color: #000;
       font-family: monospace;
       color: #00ff00;
+      height: 100%;
     }
     #terminal {
-      background-color: rgba(0, 0, 0, 0.75);
+      background: url("kali-bg.png") no-repeat center center fixed;
+      background-size: cover;
+      height: 100%;
       padding: 20px;
-      height: 100vh;
       overflow-y: auto;
     }
     .line {
@@ -42,14 +43,6 @@
   </style>
 </head>
 <body>
-  <script>
-    const pass = prompt("Enter password:");
-    if (pass !== "ill.") {
-      document.body.innerHTML = "<h1 style='color:red;'>Unauthorized</h1>";
-      throw new Error("Unauthorized access");
-    }
-  </script>
-
   <div id="terminal"></div>
   <script>
     const terminal = document.getElementById("terminal");
@@ -57,9 +50,23 @@
     function printResponse(text) {
       const response = document.createElement("div");
       response.className = "response";
-      response.textContent = text;
+      response.textContent = text || "❌ ไม่มีข้อความตอบกลับจาก GPT";
       terminal.appendChild(response);
       terminal.scrollTop = terminal.scrollHeight;
+      console.log("📤 แสดงผลตอบกลับ:", text);
+    }
+
+    function sendToGPT(prompt) {
+      if (!prompt.trim()) {
+        printResponse("⚠️ โปรดพิมพ์คำสั่งก่อนกด Enter");
+        return;
+      }
+
+      console.log("📨 ส่งคำสั่งไปยัง GPT ผ่าน postMessage:", prompt);
+      window.parent.postMessage({
+        type: "gpt-terminal",
+        prompt: prompt
+      }, "*");
     }
 
     function newPrompt() {
@@ -73,15 +80,15 @@
       const input = document.createElement("input");
       input.className = "input";
       input.type = "text";
+      input.autofocus = true;
 
-      input.addEventListener("keydown", async function (e) {
+      input.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
           const command = input.value;
           input.disabled = true;
 
-          window.parent.postMessage({ type: "gpt-terminal", prompt: command }, "*");
-
           printResponse("⏳ กำลังประมวลผล...");
+          sendToGPT(command);
           newPrompt();
         }
       });
@@ -89,14 +96,17 @@
       line.appendChild(prompt);
       line.appendChild(input);
       terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
       input.focus();
     }
 
     window.addEventListener("message", (event) => {
+      // 👉 คุณสามารถเพิ่มเงื่อนไข origin ได้ถ้าต้องการความปลอดภัยมากขึ้น
       if (event.data?.type === "gpt-terminal-response") {
         const responses = terminal.querySelectorAll(".response");
         if (responses.length) {
-          responses[responses.length - 1].textContent = event.data.content;
+          const reply = event.data.content || "❌ ไม่มีข้อความตอบกลับจาก GPT";
+          responses[responses.length - 1].textContent = reply;
         }
       }
     });
