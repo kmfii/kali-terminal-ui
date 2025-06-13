@@ -1,3 +1,10 @@
+
+---
+
+## ✅ 2. terminal.html (ไฟล์เต็มพร้อมใช้งาน)
+อัปโหลดไปที่: `https://kmfii.github.io/test/terminal.html`
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +83,7 @@
 
           input.disabled = true;
 
-          console.log("📤 ส่งคำสั่งไปยัง GPT ผ่าน postMessage:", command);
+          console.log("📤 ส่งคำสั่งไปยัง GPT:", command);
           window.parent.postMessage({ type: "gpt-terminal", prompt: command }, "*");
 
           printResponse("⏳ กำลังประมวลผล...");
@@ -91,7 +98,7 @@
       input.focus();
     }
 
-    // ✅ ตัวรับผลลัพธ์จาก GPT
+    // ✅ รับผลลัพธ์จาก GPT
     window.addEventListener("message", (event) => {
       if (event.data?.type === "gpt-terminal-response") {
         const responses = terminal.querySelectorAll(".response");
