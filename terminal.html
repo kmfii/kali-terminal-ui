@@ -1,10 +1,3 @@
-
----
-
-## ✅ 2. terminal.html (ไฟล์เต็มพร้อมใช้งาน)
-อัปโหลดไปที่: `https://kmfii.github.io/test/terminal.html`
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,7 +91,7 @@
       input.focus();
     }
 
-    // ✅ รับผลลัพธ์จาก GPT
+    // ✅ ฟังผลลัพธ์จาก GPT
     window.addEventListener("message", (event) => {
       if (event.data?.type === "gpt-terminal-response") {
         const responses = terminal.querySelectorAll(".response");
