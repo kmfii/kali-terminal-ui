@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Kali Terminal</title>
+  <title>Kali Terminal (Debug)</title>
   <style>
     html, body {
       margin: 0;
@@ -61,7 +61,6 @@
         printResponse("⚠️ โปรดพิมพ์คำสั่งก่อนกด Enter");
         return;
       }
-
       console.log("📨 ส่งคำสั่งไปยัง GPT ผ่าน postMessage:", prompt);
       window.parent.postMessage({
         type: "gpt-terminal",
@@ -86,7 +85,6 @@
         if (e.key === "Enter") {
           const command = input.value;
           input.disabled = true;
-
           printResponse("⏳ กำลังประมวลผล...");
           sendToGPT(command);
           newPrompt();
@@ -101,13 +99,18 @@
     }
 
     window.addEventListener("message", (event) => {
-      // 👉 คุณสามารถเพิ่มเงื่อนไข origin ได้ถ้าต้องการความปลอดภัยมากขึ้น
+      console.log("📥 รับ message จาก GPT:", event);
       if (event.data?.type === "gpt-terminal-response") {
         const responses = terminal.querySelectorAll(".response");
         if (responses.length) {
           const reply = event.data.content || "❌ ไม่มีข้อความตอบกลับจาก GPT";
           responses[responses.length - 1].textContent = reply;
+          console.log("📤 แสดงผลตอบกลับ:", reply);
+        } else {
+          console.warn("⚠️ ไม่พบ response element เพื่อแสดงผล");
         }
+      } else {
+        console.log("📎 ข้าม message ที่ไม่เกี่ยวข้อง:", event.data);
       }
     });
 
